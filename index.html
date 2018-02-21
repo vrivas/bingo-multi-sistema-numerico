@@ -1,0 +1,165 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Secuencia de números para el bingo</title>
+  <style>
+  table.comprobacion{
+    width: 100%;
+    border: 1px solid blue;
+    font-size: 120%;
+    margin-bottom: .6em;
+  }
+
+  table.comprobacion td {
+    text-align: center;
+    border: 1px solid blue;
+    height: 3em;
+    width: 5em;
+  }
+
+  input {
+    font-size:100%;
+  }
+  h2 {
+    text-align: center;
+  }
+
+sub {
+  font-size: 70%;
+}
+  h2#numero {
+    margin-top: 2em;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10em;
+    font-size: 300%;
+    width: 5em;
+    border: 5px solid rgb( 100,100,240);
+    background-color: rgba( 100,200,240,0.1);
+    padding: 1em;
+  }
+  </style>
+  <script src="./zepto.min.js"></script>
+  <script src="http://storage.vrivas.es/jsSequence/jssequence.js"></script>
+  <script src="http://storage.vrivas.es/jsRandom/jsrandom.js"></script>
+  <script>
+
+  var tempor;
+  var sq;
+  var numeros=[];
+  var segEspera=5000;
+  function Numero(num) {
+    this.num=num;
+    this.n2=num.toString(2)+" )<sub>2</sub>";
+    this.n10=num+" )<sub>10</sub>";
+    this.n8=num.toString(8)+" )<sub>8</sub>";
+    this.n16=num.toString(16).toUpperCase()+" )<sub>16</sub>";
+    this.haSalido=false;
+
+    this.sale=function() {
+      this.haSalido=true;
+    }
+
+    this.toString=function() {
+      return this.num+"=> "+this.n2+" , "+this.n8+" , "+this.n10+" , "+this.n16+" :  "+this.haSalido;
+    }
+
+    this.toRow=function() {
+      return "<tr>\
+        <td>"+this.n2
+        +"</td><td>"+this.n8
+        +"</td><td>"+this.n10
+        +"</td><td>"+this.n16
+        +"</td>\
+        </tr>";
+    }
+  }
+
+  function iniciar() {
+    sq=new jsSequence.JsSequence(0,31);
+    for( var i=0; i<32; ++i ){
+      numeros.push( new Numero(i) );
+    }
+  }
+
+  function nuevoNumero() {
+      var nuevo=sq.get();
+      numeros[nuevo].sale();
+      $("#numero").html(changeBase(nuevo));
+      tempor=setTimeout( nuevoNumero, segEspera );
+      escribir_tabla();
+  }
+
+  function changeBase( numero ) {
+    var base=jsRandom.get(0,3);
+    switch (base) {
+      case 0: return (numero.toString(2)+")<sub>2</sub>").toUpperCase();
+      case 1: return (numero.toString(8)+")<sub>8</sub>").toUpperCase();
+      case 2: return (numero+")<sub>10</sub>").toUpperCase();
+      case 3: return (numero.toString(16)+")<sub>16</sub>").toUpperCase();
+
+    }
+  }
+  function escribir_tabla() {
+    var toRet="<table class='comprobacion'>\
+      <tr><th>Binario</th><th>Octal</th><th>Decimal</th><th>Hexadecimal</th></tr>\
+    ";
+
+    for ( var i=0; i<32; ++i ) {
+      if( numeros[i].haSalido ) toRet+=numeros[i].toRow()+"\n";
+    }
+    $("#tabla").html(toRet);
+  }
+
+  function pausar() {
+    if ( $("#pausar").val()=="Pausar")  {
+      clearTimeout(tempor);
+      $("#pausar").val("Continuar");
+    } else {
+      $("#tabla").hide();
+      nuevoNumero();
+      $("#pausar").val("Pausar");
+    }
+  }
+
+  function comprobar() {
+    if( $("#pausar").val()=="Pausar" )  pausar();
+    $("#tabla").toggle();
+  }
+  </script>
+</head>
+<body>
+  <h1>Generando números para el bingo...</h1>
+  <h2>
+    <input type="button" value="Iniciar" id="pausar">
+    <input type="button" value="Comprobar" id="comprobar">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="button" value="Más lento" id="slower">
+    <input type="text" size="6" id="segundos">
+    <input type="button" value="Más rápido" id="faster">
+
+  </h2>
+  <h2 id="numero"></h2>
+  <div id="tabla"></div>
+
+  <script>
+  // asigno eventos
+  $("#tabla").hide();
+  $("#segundos").val(segEspera);
+  $( "#pausar").click( pausar )
+  $( "#comprobar").click( comprobar)
+  $( "#slower").click( function() {
+    if( segEspera<10000) segEspera+=1000;
+    $("#segundos").val(segEspera);
+  })
+
+  $( "#faster").click( function() {
+    if( segEspera>2000) segEspera-=1000;
+    $("#segundos").val(segEspera);
+  })
+
+
+  iniciar();
+  </script>
+</body>
+</html>

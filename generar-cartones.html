@@ -1,0 +1,129 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+  table.carton{
+    width: 100%;
+    border: 1px solid blue;
+    font-size: 120%;
+    margin-bottom: .6em;
+  }
+
+  table.carton td {
+    text-align: center;
+    border: 1px solid blue;
+    height: 3em;
+    width: 5em;
+  }
+
+  @media print {
+    div.pagina {
+      page-break-after: always;
+    }
+  }
+
+  </style>
+  <script src="http://storage.vrivas.es/jsRandom/jsrandom.js"></script>
+  <script>
+  var cartones=[];
+  function Carton() {
+    this.id=cartones.length+1;
+    this.suma=0;
+    this.numeros=[];
+    this.generar=function() {
+      do {
+        this.asignarNumeros();
+      } while (this.estaRepetido(cartones));
+    }
+
+    this.asignarNumeros=function() {
+      for( var i=0; i<8; ++i ) {
+        var nuevo;
+        do {
+          nuevo=jsRandom.get(0,7)+(Math.floor(i/2)*8);
+        } while (this.numeros.length>0 && this.numeros[this.numeros.length-1]==nuevo);
+        this.numeros.push(nuevo  );
+        this.suma+=nuevo;
+      }
+      this.numeros.sort(function(a,b) {return a-b});
+    }
+
+    this.estaRepetido=function( cartones ) {
+      for( var i=0; i<cartones.length; ++i ) {
+        if (this.id!=cartones[i].id &&
+              this.numeros[0]==cartones[i].numeros[0] &&
+                this.numeros[1]==cartones[i].numeros[1] &&
+                this.numeros[2]==cartones[i].numeros[2] &&
+                this.numeros[3]==cartones[i].numeros[3] &&
+                this.numeros[4]==cartones[i].numeros[4] &&
+                this.numeros[5]==cartones[i].numeros[5] &&
+                this.numeros[6]==cartones[i].numeros[6] &&
+                this.numeros[7]==cartones[i].numeros[7]) return true;
+      }
+      return false;
+    }
+
+    this.toString=function() {
+      return this.id+": "+this.numeros.join()+" ("+this.suma+")";
+    }
+
+    this.toTable=function() {
+      var toRet="<table rows='4' cols='8' class='carton'>\n";
+      toRet+="\
+      <tr><td colspan='8'>Cartón "
+        + this.id
+        + "\
+        </td></tr>\
+      ";
+      var numDato=0;
+      for( var i=0; i<4; ++i ) {
+        toRet+="<tr>\n";
+        var posicion1=jsRandom.get(0,3);
+        var posicion2=posicion1+4;
+
+        for( var j=0; j<8; ++j ) {
+          if( j==posicion1 || j==posicion2 ) {
+            toRet+="<td>"+changeBase(this.numeros[numDato++])+"</td>\n";
+          } else {
+            toRet+="<td> -- </td>\n";
+          }
+        }
+        toRet+="</tr>\n";
+      }
+      toRet+="</table>\n";
+      return toRet;
+    }
+    this.generar();
+  }
+
+
+  function changeBase( numero ) {
+    var base=jsRandom.get(0,3);
+    switch (base) {
+      case 0: return (numero.toString(2)+")<sub>2</sub>").toUpperCase();
+      case 1: return (numero.toString(8)+")<sub>8</sub>").toUpperCase();
+      case 2: return (numero+")<sub>10</sub>").toUpperCase();
+      case 3: return (numero.toString(16)+")<sub>16</sub>").toUpperCase();
+
+    }
+  }
+
+  var nCartones=80;
+  for( var i=0; i<nCartones; ++i ) {
+    cartones.push( new Carton() );
+  }
+
+  </script>
+</head>
+<body>
+<div id="imprime-cartones"></div>
+<script>
+for( var i=0; i<nCartones; ++i ) {
+  //document.getElementById("imprime-cartones").innerHTML+="<p>"+cartones[i].toString()+"</p>\n";
+  if( !i ) document.getElementById("imprime-cartones").innerHTML+="<div class='pagina'>\n";
+  else if( !(i%3) ) document.getElementById("imprime-cartones").innerHTML+="</div>\n<div class='pagina'>\n";
+  document.getElementById("imprime-cartones").innerHTML+=cartones[i].toTable();
+}
+</script>
+</body>
+</html>
