@@ -79,8 +79,8 @@
       for( var i=0; i<4; ++i ) {
         toRet+="<tr>\n";
         var posicion1=jsRandom.get(0,3);
-        var posicion2=posicion1+4;
-
+        //var posicion2=posicion1+4;
+        var posicion2=jsRandom.get(4,7);
         for( var j=0; j<8; ++j ) {
           if( j==posicion1 || j==posicion2 ) {
             toRet+="<td>"+changeBase(this.numeros[numDato++])+"</td>\n";
